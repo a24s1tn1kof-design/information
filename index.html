@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Досье по номеру</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(135deg, #0a0a15, #16162b, #0d0d1f);
+    color: #e6e6e6;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .container {
+    max-width: 780px;
+    width: 100%;
+    background: rgba(18, 18, 32, 0.9);
+    border: 1px solid #2a2a4a;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 0 60px rgba(80, 80, 200, 0.2);
+    margin-top: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #7ee8fa;
+    font-size: 24px;
+    margin: 0 0 6px;
+    text-shadow: 0 0 12px rgba(126, 232, 250, 0.4);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  h1 svg { width: 26px; height: 26px; fill: #7ee8fa; }
+  .subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 12px;
+    margin-bottom: 25px;
+    letter-spacing: 0.5px;
+  }
+  label {
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #9090b0;
+    display: flex; align-items: center; gap: 6px;
+  }
+  label svg { width: 14px; height: 14px; fill: #7ee8fa; }
+  input, select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #333355;
+    background: #12122a;
+    color: #fff;
+    font-size: 15px;
+    margin-bottom: 15px;
+    outline: none;
+    transition: 0.2s;
+  }
+  input:focus, select:focus {
+    border-color: #7ee8fa;
+    box-shadow: 0 0 8px rgba(126,232,250,0.3);
+  }
+  button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #7ee8fa, #8a7dfa);
+    color: #0a0a15;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    letter-spacing: 0.5px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  button svg { width: 18px; height: 18px; fill: #0a0a15; }
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(126,232,250,0.4);
+  }
+  .result {
+    margin-top: 25px;
+    display: none;
+    animation: fade 0.5s ease;
+  }
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .header-card {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    padding: 16px;
+    background: linear-gradient(135deg, #1a1a35, #16162b);
+    border: 1px solid #2a2a4a;
+    border-radius: 12px;
+    margin-bottom: 18px;
+  }
+  .avatar {
+    width: 90px; height: 90px;
+    border-radius: 12px;
+    background: #0f0f1f;
+    border: 2px solid #7ee8fa;
+    flex-shrink: 0;
+  }
+  .header-info h2 { margin: 0 0 6px; color: #7ee8fa; font-size: 18px; }
+  .header-info .status {
+    color: #6be585;
+    font-size: 12px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .header-info .status svg { width: 12px; height: 12px; fill: #6be585; }
+  h2.section {
+    color: #8a7dfa;
+    font-size: 15px;
+    margin: 22px 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #2a2a4a;
+    display: flex; align-items: center; gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  h2.section svg { width: 16px; height: 16px; fill: #8a7dfa; }
+  .row {
+    display: flex;
+    padding: 8px 4px;
+    border-bottom: 1px solid #1e1e38;
+    font-size: 14px;
+  }
+  .row:last-child { border-bottom: none; }
+  .row .key { color: #8080a0; min-width: 200px; padding-right: 10px; }
+  .row .val { color: #e6e6e6; font-weight: 500; flex: 1; word-break: break-word; }
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 10px;
+    font-size: 11px;
+    background: #2a2a4a;
+    color: #7ee8fa;
+    margin-left: 6px;
+  }
+  .risk-low { color: #6be585; }
+  .risk-mid { color: #ffcc55; }
+  .risk-high { color: #ff6b6b; }
+  .qr-wrap {
+    display: flex; gap: 18px; align-items: center; margin-top: 12px;
+    padding: 14px; background: #12122a;
+    border-radius: 10px; border: 1px solid #2a2a4a;
+  }
+  .qr-wrap img {
+    width: 120px; height: 120px;
+    background: #fff; padding: 6px; border-radius: 8px;
+  }
+  .qr-text { font-size: 12px; color: #8080a0; line-height: 1.7; }
+  .qr-text b { color: #7ee8fa; }
+  .warn {
+    text-align: center;
+    font-size: 11px;
+    color: #555;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px dashed #2a2a4a;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .warn svg { width: 12px; height: 12px; fill: #555; }
+  .secret-stamp {
+    display: inline-block;
+    border: 2px solid #ff6b6b;
+    color: #ff6b6b;
+    padding: 3px 12px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    border-radius: 4px;
+    transform: rotate(-3deg);
+    font-weight: bold;
+    margin-bottom: 12px;
+  }
+  .company-item {
+    padding: 6px 0;
+    font-size: 13px;
+    color: #c0c0d8;
+    border-bottom: 1px dashed #1e1e38;
+  }
+  .company-item:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>
+    <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4a3 3 0 110 6 3 3 0 010-6zm0 13c-2.5 0-4.71-1.28-6-3.23.03-2 4-3.1 6-3.1s5.97 1.1 6 3.1A7.02 7.02 0 0112 18z"/></svg>
+    Генератор досье
+  </h1>
+  <div class="subtitle">Все данные вымышленные. Только для розыгрыша.</div>
+
+  <label>
+    <svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 006.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.2.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 013 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2z"/></svg>
+    Номер телефона
+  </label>
+  <input type="tel" id="phone" placeholder="+7 900 123-45-67" value="+7 999 123-45-67">
+
+  <label>
+    <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z"/></svg>
+    Возраст
+  </label>
+  <input type="number" id="age" min="1" max="120" placeholder="25" value="25">
+
+  <label>
+    <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
+    Пол
+  </label>
+  <select id="gender">
+    <option value="auto">Определить автоматически</option>
+    <option value="male">Мужской</option>
+    <option value="female">Женский</option>
+  </select>
+
+  <button onclick="generate()">
+    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34C15.34 5.59 12.9 3.5 10 3.5 6.42 3.5 3.5 6.42 3.5 10s2.92 6.5 6.5 6.5c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 10s2.01-4 4.5-4S14 8.01 14 10s-2.01 4-4.5 4z"/></svg>
+    Сгенерировать досье
+  </button>
+
+  <div class="result" id="result"></div>
+  <div class="warn">
+    <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+    Все совпадения случайны. Это шуточная программа.
+  </div>
+</div>
+<script>
+/* ============ БАЗЫ ДАННЫХ ============ */
+const maleFirst = ["Александр","Дмитрий","Максим","Сергей","Андрей","Алексей","Артём","Илья","Кирилл","Михаил","Никита","Матвей","Роман","Егор","Арсений","Иван","Денис","Даниил","Тимофей","Владислав","Пётр","Николай","Олег","Виктор","Павел","Григорий","Станислав","Валентин","Юрий","Константин"];
+const femaleFirst = ["Анна","Мария","Елена","Ольга","Дарья","София","Анастасия","Виктория","Полина","Екатерина","Наталья","Ирина","Татьяна","Юлия","Ксения","Алиса","Вероника","Маргарита","Валерия","Кристина","Людмила","Светлана","Галина","Надежда","Оксана","Арина","Ева","Милана","Варвара","Ульяна"];
+const maleMid = ["Александрович","Дмитриевич","Сергеевич","Андреевич","Алексеевич","Иванович","Михайлович","Николаевич","Владимирович","Петрович","Олегович","Викторович","Павлович","Романович","Максимович","Юрьевич","Константинович"];
+const femaleMid = ["Александровна","Дмитриевна","Сергеевна","Андреевна","Алексеевна","Ивановна","Михайловна","Николаевна","Владимировна","Петровна","Олеговна","Викторовна","Павловна","Романовна","Максимовна","Юрьевна","Константиновна"];
+const lastMale = ["Иванов","Смирнов","Кузнецов","Попов","Васильев","Петров","Соколов","Михайлов","Новиков","Фёдоров","Морозов","Волков","Алексеев","Лебедев","Семёнов","Егоров","Павлов","Козлов","Степанов","Николаев","Орлов","Андреев","Макаров","Никитин","Захаров","Белов","Комаров","Титов","Крылов","Гусев"];
+const cities = ["г. Москва","г. Санкт-Петербург","г. Новосибирск","г. Екатеринбург","г. Казань","г. Нижний Новгород","г. Челябинск","г. Самара","г. Омск","г. Ростов-на-Дону","г. Уфа","г. Красноярск","г. Воронеж","г. Пермь","г. Волгоград","г. Краснодар","г. Саратов","г. Тюмень","г. Тольятти","г. Ижевск"];
+const streets = ["ул. Ленина","ул. Пушкина","пр. Мира","ул. Гагарина","ул. Советская","ул. Садовая","ул. Центральная","ул. Школьная","ул. Лесная","пр. Победы","ул. Кирова","ул. Молодёжная","ул. Северная","ул. Заречная","ул. Солнечная","ул. Новая","ул. Октябрьская","ул. Первомайская"];
+const jobs = ["ООО «Ромашка» — менеджер","ПАО «Сбербанк» — специалист","ООО «ТехноСофт» — программист","МБОУ СОШ №15 — учитель","ГБУЗ Городская больница — врач","ООО «ЛогистикПлюс» — водитель","ИП — предприниматель","ООО «СтройМонтаж» — инженер","Фрилансер — дизайнер","ООО «ФинТраст» — бухгалтер","МВД России — сотрудник","ООО «МаркетПро» — маркетолог","ООО «АвтоДилер» — механик","Ресторан «Уют» — повар","ООО «КурьерСервис» — курьер","Студент ВУЗа","ООО «МедСервис» — фельдшер","ПАО «Ростелеком» — техник","ООО «АльфаСтрой» — прораб","ООО «ДатаЦентр» — системный администратор"];
+const educations = ["МГУ им. Ломоносова","СПбГУ","МГТУ им. Баумана","НИУ ВШЭ","МГИМО","РУДН","КФУ","УрФУ","НГУ","ТГУ","МФТИ","РЭУ им. Плеханова","РНИМУ им. Пирогова","МГЮА им. Кутафина","РАНХиГС","СПбПУ"];
+const marital = ["Холост / Не замужем","В отношениях","Женат / Замужем","Разведён(а)","Вдовец / Вдова","Гражданский брак"];
+const blood = ["I (0) Rh+","I (0) Rh−","II (A) Rh+","II (A) Rh−","III (B) Rh+","III (B) Rh−","IV (AB) Rh+","IV (AB) Rh−"];
+const nationality = ["русский(ая)","украинец(ка)","белорус(ка)","татарин(ка)","казах(ка)","армянин(ка)","грузин(ка)","еврей(ка)","немец(ка)","чуваш(ка)","башкир(ка)","мордвин(ка)"];
+const cars = ["Lada Vesta","Kia Rio","Hyundai Solaris","Toyota Camry","BMW 3 Series","Mercedes E-Class","Skoda Octavia","VW Polo","Renault Logan","Nissan Qashqai","Mazda 6","Audi A4","Ford Focus","Chery Tiggo","Haval Jolion","Geely Coolray"];
+const banks = ["Сбербанк","Тинькофф","Альфа-Банк","ВТБ","Райффайзен","Газпромбанк","Открытие","Совкомбанк","Почта Банк","Росбанк"];
+const operators = ["МТС","Билайн","МегаФон","Tele2","Yota","СберМобайл","Тинькофф Мобайл"];
+const mbti = ["INTJ","INTP","ENTJ","ENTP","INFJ","INFP","ENFJ","ENFP","ISTJ","ISFJ","ESTJ","ESFJ","ISTP","ISFP","ESTP","ESFP"];
+const countries = ["Турция","Египет","ОАЭ","Таиланд","Италия","Испания","Германия","Франция","Китай","Япония","Грузия","Армения","Казахстан","Беларусь","Сербия","Черногория"];
+const regions = ["77","78","50","47","66","23","61","74","16","02","52","24","36","34","63","64","72","86","89","26"];
+const troops = ["Мотострелковые","Танковые","ВДВ","ВМФ","РВСН","Инженерные","Войска связи","Росгвардия","Космические войска","Пограничные"];
+const subs = ["Яндекс Плюс","Netflix","Spotify","VK Музыка","Telegram Premium","Apple Music"];
+const petNames = ["Барсик","Мурка","Рекс","Шарик","Пушок","Симба","Люси","Боня","Гоша","Соня"];
+const petTypes = ["Кот","Кошка","Собака","Хомяк","Попугай","Рыбки"];
+
+/* ============ УТИЛИТЫ ============ */
+const rand = a => a[Math.floor(Math.random() * a.length)];
+const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const pad = (n, l) => String(n).padStart(l, "0");
+
+const translitMap = {а:"a",б:"b",в:"v",г:"g",д:"d",е:"e",ё:"e",ж:"zh",з:"z",и:"i",й:"y",к:"k",л:"l",м:"m",н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",у:"u",ф:"f",х:"h",ц:"c",ч:"ch",ш:"sh",щ:"sch",ъ:"",ы:"y",ь:"",э:"e",ю:"yu",я:"ya"};
+const translit = s => s.toLowerCase().split("").map(c => translitMap[c] || c).join("");
+
+function randomDate(y1, y2) {
+  const y = randInt(y1, y2);
+  return `${pad(randInt(1,28),2)}.${pad(randInt(1,12),2)}.${y}`;
+}
+
+function zodiac(day, month) {
+  const z = ["Козерог","Водолей","Рыбы","Овен","Телец","Близнецы","Рак","Лев","Дева","Весы","Скорпион","Стрелец","Козерог"];
+  const d = [20,19,21,20,21,21,23,23,23,23,22,22];
+  return z[month - (day < d[month-1] ? 1 : 0)];
+}
+
+function chineseZodiac(year) {
+  const animals = ["Крыса","Бык","Тигр","Кролик","Дракон","Змея","Лошадь","Коза","Обезьяна","Петух","Собака","Свинья"];
+  return animals[(year - 4) % 12];
+}
+
+/* ============ ГЕНЕРАТОРЫ ДОКУМЕНТОВ ============ */
+function makePassport() {
+  return `${pad(randInt(1000,9999),4)} ${pad(randInt(100000,999999),6)}`;
+}
+function makeINN() {
+  let s = ""; for (let i=0;i<12;i++) s += randInt(0,9); return s;
+}
+function makeSNILS() {
+  let s = ""; for (let i=0;i<11;i++) s += randInt(0,9);
+  return s.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1-$2-$3 $4");
+}
+function makeOMS() {
+  return pad(randInt(1000,9999),4) + " " + pad(randInt(100000,999999),6);
+}
+function makeLicense() {
+  return `${pad(randInt(1,99),2)} АА ${pad(randInt(100000,999999),6)}`;
+}
+function makeCard() {
+  let num = "4"; for (let i=0;i<15;i++) num += randInt(0,9);
+  return num.replace(/(\d{4})(?=\d)/g, "$1 ");
+}
+function makeCarPlate() {
+  const L = "АВЕКМНОРСТУХ";
+  return `${L[randInt(0,L.length-1)]}${pad(randInt(100,999),3)}${L[randInt(0,L.length-1)]}${L[randInt(0,L.length-1)]} ${pad(randInt(1,199),2)}`;
+}
+function makeIMEI() {
+  let s = ""; for (let i=0;i<15;i++) s += randInt(0,9); return s;
+}
+function makeIP() {
+  return `${randInt(5,220)}.${randInt(0,255)}.${randInt(0,255)}.${randInt(1,254)}`;
+}
+function makeOGRNIP() {
+  let s = ""; for (let i=0;i<15;i++) s += randInt(0,9); return s;
+}
+function makeCrypto() {
+  const chars = "0123456789abcdef";
+  let s = "0x"; for (let i=0;i<40;i++) s += chars[randInt(0,15)]; return s;
+}
+function makeInstagram(first) {
+  return "@" + translit(first).slice(0,6) + randInt(10,9999);
+}
+function makeTelegram(first) {
+  return "@" + translit(first).slice(0,5) + "_" + randInt(10,999);
+}
+function makeVk() {
+  return "vk.com/id" + randInt(1000000, 999999999);
+}
+function makePhoneModel() {
+  return rand(["Samsung Galaxy S23","Samsung Galaxy A54","Xiaomi Redmi Note 12","iPhone 13","iPhone 14 Pro","Google Pixel 7","Honor 90","Realme 10","Poco X5","Huawei P60"]);
+}
+function makeOS() {
+  return rand(["Android 13","Android 14","iOS 16","iOS 17","HarmonyOS 4"]);
+}
+function makeCarInsurance() {
+  return "ХХХ " + pad(randInt(1000000000,9999999999),10);
+}
+function makeCreditScore() {
+  return randInt(300, 900);
+}
+function makeCheckNum() {
+  return pad(randInt(1000000,9999999), 7) + " " + pad(randInt(100,999),3);
+}
+  /* ============ ОСНОВНАЯ ФУНКЦИЯ ============ */
+function generate() {
+  const phone = document.getElementById("phone").value.trim() || "+7 000 000-00-00";
+  let age = parseInt(document.getElementById("age").value) || 25;
+  if (age < 1) age = 1; if (age > 120) age = 120;
+
+  let gender = document.getElementById("gender").value;
+  if (gender === "auto") gender = Math.random() < 0.5 ? "male" : "female";
+  const isMale = gender === "male";
+
+  // ФИО
+  const first = isMale ? rand(maleFirst) : rand(femaleFirst);
+  const mid = isMale ? rand(maleMid) : rand(femaleMid);
+  const lastBase = rand(lastMale);
+  const last = isMale ? lastBase : lastBase + "а";
+  const fio = `${last} ${first} ${mid}`;
+
+  // Дата рождения
+  const currentYear = new Date().getFullYear();
+  const birthYear = currentYear - age;
+  const birthDay = randInt(1, 28);
+  const birthMonth = randInt(1, 12);
+  const birthDate = `${pad(birthDay,2)}.${pad(birthMonth,2)}.${birthYear}`;
+  const z = zodiac(birthDay, birthMonth);
+  const chz = chineseZodiac(birthYear);
+
+  // Родители
+  const fatherFirst = rand(maleFirst);
+  const fatherMid = rand(maleMid);
+  const fatherFio = `${lastBase} ${fatherFirst} ${fatherMid}`;
+  const fatherAge = age + randInt(20, 35);
+  const fatherBirth = currentYear - fatherAge;
+  const fatherWork = rand(jobs);
+
+  const motherFirst = rand(femaleFirst);
+  const motherMid = rand(femaleMid);
+  const motherFio = `${isMale ? lastBase + "а" : lastBase} ${motherFirst} ${motherMid}`;
+  const motherAge = age + randInt(18, 33);
+  const motherBirth = currentYear - motherAge;
+  const motherWork = rand(jobs);
+
+  // Супруг(а), дети
+  let spouse = "—";
+  let spouseBirth = "—";
+  let kids = "нет";
+  let marriageDate = "—";
+  if (age >= 18) {
+    const married = Math.random() < 0.55;
+    if (married) {
+      if (isMale) {
+        spouse = `${lastBase}а ${rand(femaleFirst)} ${rand(femaleMid)}`;
+      } else {
+        spouse = `${lastBase} ${rand(maleFirst)} ${rand(maleMid)}`;
+      }
+      spouseBirth = randomDate(birthYear - 5, birthYear + 8);
+      marriageDate = randomDate(birthYear + 20, currentYear - 1);
+      if (age >= 20 && Math.random() < 0.65) {
+        const n = randInt(1, 3);
+        kids = n + " " + (n === 1 ? "ребёнок" : n < 5 ? "ребёнка" : "детей");
+        const kidNames = [];
+        for (let i = 0; i < n; i++) {
+          const kidMale = Math.random() < 0.5;
+          const kid = (kidMale ? rand(maleFirst) : rand(femaleFirst)) + ` (${randomDate(birthYear + 20, Math.max(birthYear + 21, currentYear - 1))})`;
+          kidNames.push(kid);
+        }
+        kids += ": " + kidNames.join(", ");
+      }
+    }
+  }
+
+  // Работа/учёба
+  let occupation;
+  if (age < 7) occupation = "Детский сад №" + randInt(1, 200);
+  else if (age < 18) occupation = "МБОУ СОШ №" + randInt(1, 200) + ", " + randInt(1, 11) + " класс";
+  else if (age < 23 && Math.random() < 0.6) occupation = rand(educations) + " — студент(ка) " + randInt(1, 6) + " курса";
+  else occupation = rand(jobs);
+
+  // Адрес
+  const city = rand(cities);
+  const address = `${city}, ${rand(streets)}, д. ${randInt(1,150)}, кв. ${randInt(1,300)}`;
+
+  // Email
+  const email = `${translit(first)}.${translit(lastBase)}${randInt(1,99)}@${rand(["mail.ru","yandex.ru","gmail.com","bk.ru","inbox.ru","list.ru"])}`;
+
+  // Оператор
+  const phoneClean = phone.replace(/\D/g, "");
+  const operator = rand(operators);
+  const region = rand(regions);
+
+  // Риск
+  const risk = randInt(1, 100);
+  const riskLabel = risk < 40 ? ["Низкий", "risk-low"] : risk < 75 ? ["Средний", "risk-mid"] : ["Высокий", "risk-high"];
+
+  // Воинский учёт
+  const cat = isMale && age >= 17 && age <= 60 ? rand(["А1","А2","Б1","Б2","Б3","В","Г","Д"]) : "—";
+  const troop = isMale && age >= 18 && age <= 60 ? rand(troops) : "—";
+  const voenkomat = isMale && age >= 17 ? `Военкомат ${rand(["Центрального","Северного","Южного","Западного","Восточного"])} района ${city}` : "—";
+
+  // Трудовая книжка
+  const companies = [];
+  if (age >= 22) {
+    const n = randInt(1, 3);
+    for (let i = 0; i < n; i++) {
+      companies.push(`${rand(jobs)} (${randomDate(birthYear + 22, currentYear - 1)} — ${i === 0 ? "н.в." : randomDate(currentYear - 5, currentYear - 1)})`);
+    }
+  }
+  const experience = age >= 22 ? randInt(1, age - 20) : 0;
+
+  // Братья/сёстры
+  const siblings = [];
+  if (Math.random() < 0.6) {
+    const n = randInt(1, 3);
+    for (let i = 0; i < n; i++) {
+      const sMale = Math.random() < 0.5;
+      const name = sMale ? rand(maleFirst) : rand(femaleFirst);
+      const diff = randInt(-10, 10);
+      const sAge = age + diff;
+      siblings.push(`${name} (${sAge > 0 ? sAge : Math.abs(sAge)} лет)`);
+    }
+  }
+  const siblingsStr = siblings.length ? siblings.join(", ") : "нет";
+
+  // Друзья
+  const friendsCount = randInt(2, 5);
+  const friends = [];
+  for (let i = 0; i < friendsCount; i++) {
+    const fMale = Math.random() < 0.5;
+    const fFirst = fMale ? rand(maleFirst) : rand(femaleFirst);
+    const fLast = fMale ? rand(lastMale) : rand(lastMale) + "а";
+    friends.push(`${fLast} ${fFirst} — +7 9${pad(randInt(0,99),2)} ${pad(randInt(1000000,9999999),7)}`);
+  }
+
+  // Питомцы
+  let pets = "нет";
+  if (Math.random() < 0.55) {
+    const n = randInt(1, 2);
+    const arr = [];
+    for (let i = 0; i < n; i++) arr.push(`${rand(petTypes)} «${rand(petNames)}»`);
+    pets = arr.join(", ");
+  }
+
+  // Поездки
+  const trips = [];
+  if (Math.random() < 0.7) {
+    const n = randInt(1, 4);
+    for (let i = 0; i < n; i++) trips.push(rand(countries));
+  }
+  const tripsStr = trips.length ? [...new Set(trips)].join(", ") : "не выезжал(а)";
+
+  // Подписки
+  const subscriptions = [];
+  const subN = randInt(0, 4);
+  for (let i = 0; i < subN; i++) {
+    const s = rand(subs);
+    if (!subscriptions.includes(s)) subscriptions.push(s);
+  }
+  const subsStr = subscriptions.length ? subscriptions.join(", ") : "нет";
+
+  // Кредиты
+  const creditScore = makeCreditScore();
+  const creditLabel = creditScore > 750 ? "Отличный" : creditScore > 600 ? "Хороший" : creditScore > 450 ? "Средний" : "Плохой";
+  const creditsCount = randInt(0, 4);
+  const loanSum = creditsCount > 0 ? randInt(50, 2500) : 0;
+
+  // Аватар
+  const avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(fio)}&backgroundColor=7ee8fa,8a7dfa`;
+
+  // QR-код
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(phone)}`;
+
+  // Секретность
+  const secrecy = rand(["СОВЕРШЕННО СЕКРЕТНО","ДЛЯ СЛУЖЕБНОГО ПОЛЬЗОВАНИЯ","СЕКРЕТНО","ДСП"]);
+
+  // Банк
+  const bank = rand(banks);
+
+  // Авто
+  const hasCar = age >= 18 && Math.random() < 0.7;
+  const car = hasCar ? `${rand(cars)} — ${makeCarPlate()}` : "нет";
+
+  // ОСАГО
+  const osago = hasCar ? makeCarInsurance() : "—";
+
+  // Штрафы
+  const fines = hasCar ? randInt(0, 25) : 0;
+  const finesSum = fines * randInt(500, 5000);
+
+  // Судимости
+  const criminal = Math.random() < 0.85 ? "нет" : `условно, ст. ${randInt(100, 200)} УК РФ`;
+
+  // Школа
+  const schoolNum = randInt(1, 200);
+  const schoolYear = birthYear + 7;
+
+  // Аттестат
+  const gpa = (randInt(35, 50) / 10).toFixed(1);
+
+  // Диплом
+  const diplomaNum = `${pad(randInt(1,99),2)} ${pad(randInt(100000,999999),6)}`;
+  const specialty = rand(["Экономист","Юрист","Программист","Инженер","Врач","Учитель","Менеджер","Бухгалтер","Дизайнер","Маркетолог"]);
+
+  // Устройство
+  const device = `${makePhoneModel()} / ${makeOS()}`;
+
+  // Соцсети
+  const insta = makeInstagram(first);
+  const tg = makeTelegram(first);
+  const vk = makeVk();
+
+  // Рендер
+  const result = document.getElementById("result");
+  result.style.display = "block";
+  result.innerHTML = `
+    <div class="secret-stamp">${secrecy}</div>
+
+    <div class="header-card">
+      <img class="avatar" src="${avatarUrl}" alt="avatar">
+      <div class="header-info">
+        <h2>${fio}</h2>
+        <div class="status">
+          <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          Данные подтверждены • Риск: <span class="${riskLabel[1]}">${riskLabel[0]} (${risk}%)</span>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      Личные данные
+    </h2>
+    <div class="row"><span class="key">Номер телефона</span><span class="val">${phone} <span class="badge">${operator}</span></span></div>
+    <div class="row"><span class="key">ФИО</span><span class="val">${fio}</span></div>
+    <div class="row"><span class="key">Пол</span><span class="val">${isMale ? "Мужской" : "Женский"}</span></div>
+    <div class="row"><span class="key">Возраст</span><span class="val">${age} лет</span></div>
+    <div class="row"><span class="key">Дата рождения</span><span class="val">${birthDate}</span></div>
+    <div class="row"><span class="key">Знак зодиака</span><span class="val">${z} / ${chz}</span></div>
+    <div class="row"><span class="key">Место рождения</span><span class="val">${city}</span></div>
+    <div class="row"><span class="key">Национальность</span><span class="val">${rand(nationality)}</span></div>
+
+    <h2 class="section">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Адрес и документы
+    </h2>
+    <div class="row"><span class="key">Адрес регистрации</span><span class="val">${address}</span></div>
+    <div class="row"><span class="key">Паспорт РФ</span><span class="val">${age >= 14 ? makePassport() : "не получен"}</span></div>
+    <div class="row"><span class="key">Кем выдан</span><span class="val">${age >= 14 ? `ОВД ${city}` : "—"}</span></div>
+    <div class="row"><span class="key">Дата выдачи</span><span class="val">${age >= 14 ? randomDate(birthYear + 14, Math.min(birthYear + 45, currentYear)) : "—"}</span></div>
+    <div class="row"><span class="key">ИНН</span><span class="val">${age >= 14 ? makeINN() : "—"}</span></div>
+    <div class="row"><span class="key">СНИЛС</span><span class="val">${age >= 14 ? makeSNILS() : "—"}</span></div>
+    <div class="row"><span class="key">Полис ОМС</span><span class="val">${makeOMS()}</span></div>
+    <div class="row"><span class="key">Загранпаспорт</span><span class="val">${age >= 18 && Math.random() < 0.6 ? `${pad(randInt(10,99),2)} ${pad(randInt(1000000,9999999),7)} (до ${randomDate(currentYear + 1, currentYear + 10)})` : "нет"}</span></div>
+    <div class="row"><span class="key">Водительское</span><span class="val">${age >= 18 ? makeLicense() + " (" + rand(["A","B","C","BC","AB"]) + ")" : "нет"}</span></div>
+    <div class="row"><span class="key">ОГРНИП</span><span class="val">${Math.random() < 0.15 && age >= 18 ? makeOGRNIP() : "нет"}</span></div>
+
+    <h2 class="section">
+      <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+      Работа и образование
+    </h2>
+    <div class="row"><span class="key">Деятельность</span><span class="val">${occupation}</span></div>
+    <div class="row"><span class="key">Образование</span><span class="val">${age >= 18 ? rand(educations) : "среднее"}</span></div>
+    <div class="row"><span class="key">Специальность</span><span class="val">${age >= 22 ? specialty : "—"}</span></div>
+    <div class="row"><span class="key">Диплом</span><span class="val">${age >= 22 ? diplomaNum : "—"}</span></div>
+    <div class="row"><span class="key">Школа</span><span class="val">МБОУ СОШ №${schoolNum}, окончил(а) в ${schoolYear + 11}</span></div>
+    <div class="row"><span class="key">Средний балл</span><span class="val">${age >= 17 ? gpa : "—"}</span></div>
+    <div class="row"><span class="key">Стаж работы</span><span class="val">${experience} лет</span></div>
+    <div class="row"><span class="key">Доход в месяц</span><span class="val">≈ ${randInt(20, 350)} 000 ₽</span></div>
+    ${companies.length ? `
+      <div class="row"><span class="key">Трудовая книжка</span><span class="val"></span></div>
+      ${companies.map(c => `<div class="company-item">• ${c}</div>`).join("")}
+    ` : ""}
+
+    <h2 class="section">
+      <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      Семья
+    </h2>
+    <div class="row"><span class="key">Семейное положение</span><span class="val">${age < 18 ? "Не в браке" : rand(marital)}</span></div>
+    <div class="row"><span class="key">Супруг(а)</span><span class="val">${spouse}${spouse !== "—" ? ` (${spouseBirth})` : ""}</span></div>
+    <div class="row"><span class="key">Дата свадьбы</span><span class="val">${marriageDate}</span></div>
+    <div class="row"><span class="key">Дети</span><span class="val">${kids}</span></div>
+    <div class="row"><span class="key">Братья / сёстры</span><span class="val">${siblingsStr}</span></div>
+    <div class="row"><span class="key">ФИО отца</span><span class="val">${fatherFio} (${fatherBirth} г.р.)</span></div>
+    <div class="row"><span class="key">Работа отца</span><span class="val">${fatherWork}</span></div>
+    <div class="row"><span class="key">ФИО матери</span><span class="val">${motherFio} (${motherBirth} г.р.)</span></div>
+    <div class="row"><span class="key">Работа матери</span><span class="val">${motherWork}</span></div>
+    <div class="row"><span class="key">Домашние питомцы</span><span class="val">${pets}</span></div>
+
+    <h2 class="section">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+      Финансы
+    </h2>
+    <div class="row"><span class="key">Банк</span><span class="val">${bank}</span></div>
+    <div class="row"><span class="key">Банковская карта</span><span class="val">${age >= 14 ? makeCard() : "нет"}</span></div>
+    <div class="row"><span class="key">Кредитный рейтинг</span><span class="val">${creditScore} — ${creditLabel}</span></div>
+    <div class="row"><span class="key">Активных кредитов</span><span class="val">${creditsCount}${creditsCount > 0 ? ` (≈ ${loanSum} 000 ₽)` : ""}</span></div>
+    <div class="row"><span class="key">Крипто-кошелёк</span><span class="val" style="font-size:11px;word-break:break-all">${Math.random() < 0.4 ? makeCrypto() : "нет"}</span></div>
+    <div class="row"><span class="key">Подписки</span><span class="val">${subsStr}</span></div>
+
+    <h2 class="section">
+      <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+      Транспорт
+    </h2>
+    <div class="row"><span class="key">Автомобиль</span><span class="val">${car}</span></div>
+    <div class="row"><span class="key">ОСАГО</span><span class="val">${osago}</span></div>
+    <div class="row"><span class="key">Штрафы ГИБДД</span><span class="val">${fines} шт. на сумму ${finesSum} ₽</span></div>
+    <div class="row"><span class="key">ДТП</span><span class="val">${hasCar ? randInt(0, 3) : 0}</span></div>
+
+    <h2 class="section">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      Цифровой след
+    </h2>
+    <div class="row"><span class="key">Email</span><span class="val">${email}</span></div>
+    <div class="row"><span class="key">Telegram</span><span class="val">${tg}</span></div>
+    <div class="row"><span class="key">Instagram</span><span class="val">${insta}</span></div>
+    <div class="row"><span class="key">VK</span><span class="val">${vk}</span></div>
+    <div class="row"><span class="key">Устройство</span><span class="val">${device}</span></div>
+    <div class="row"><span class="key">IMEI</span><span class="val">${makeIMEI()}</span></div>
+    <div class="row"><span class="key">IP-адрес</span><span class="val">${makeIP()} <span class="badge">${city}</span></span></div>
+
+    <h2 class="section">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm3.5-9l-4.5-2.5v5l4.5 2.5V11z"/></svg>
+      Дополнительно
+    </h2>
+    <div class="row"><span class="key">Загранпоездки</span><span class="val">${tripsStr}</span></div>
+    <div class="row"><span class="key">Судимости</span><span class="val">${criminal}</span></div>
+    ${isMale && age >= 17 ? `
+      <div class="row"><span class="key">Воинский учёт</span><span class="val">${cat}, ${troop}</span></div>
+      <div class="row"><span class="key">Военкомат</span><span class="val">${voenkomat}</span></div>
+    ` : ""}
+    <div class="row"><span class="key">MBTI</span><span class="val">${rand(mbti)}</span></div>
+    <div class="row"><span class="key">Близкие друзья</span><span class="val"></span></div>
+    ${friends.map(f => `<div class="company-item">• ${f}</div>`).join("")}
+
+    <h2 class="section">
+      <svg viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg>
+      QR-код
+    </h2>
+    <div class="qr-wrap">
+      <img src="${qrUrl}" alt="qr">
+      <div class="qr-text">
+        Отсканируйте для быстрого доступа.<br>
+        <b>Номер:</b> ${phone}<br>
+        <b>Владелец:</b> ${fio}<br>
+        <b>Регион:</b> ${region}<br>
+        <b>Оператор:</b> ${operator}
+      </div>
+    </div>
+  `;
+
+  result.scrollIntoView({behavior: "smooth", block: "start"});
+}
+</script>
+</body>
+</html>
